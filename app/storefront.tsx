@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { products, type Product } from "../lib/catalog";
 
 
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
 
 export function Storefront() {
+  const router = useRouter();
   const [cart, setCart] = useState<Product[]>([]);
   const [drawer, setDrawer] = useState(false);
   const [query, setQuery] = useState("");
@@ -15,6 +17,7 @@ export function Storefront() {
   const subtotal = cart.reduce((sum, product) => sum + product.price, 0);
   const add = (product: Product) => { setCart((items) => [...items, product]); setDrawer(true); setActiveProduct(null); };
   const remove = (index: number) => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index));
+  const completeOrder = () => { setDrawer(false); setCart([]); router.push("/checkout/confirmation"); };
 
   return <main>
     <div className="announcement">Livraison offerte dès 75 € <span>—</span> Échantillon signature dans chaque commande</div>
@@ -37,7 +40,7 @@ export function Storefront() {
     <footer id="newsletter"><div className="footer-top"><a className="wordmark" href="#top">KiMiA<span>·</span></a><div><h3>Un peu de lumière<br/>dans votre boîte mail.</h3><form onSubmit={(event) => event.preventDefault()}><input type="email" required placeholder="Votre adresse e-mail" aria-label="Votre adresse e-mail"/><button aria-label="S'inscrire">→</button></form></div></div><div className="footer-bottom"><span>© 2026 KiMiA Beauty</span><span>Livraison & retours · Conditions · Confidentialité</span><span>France / EUR</span></div></footer>
 
     {activeProduct && <div className="modal-backdrop" role="presentation" onMouseDown={() => setActiveProduct(null)}><section className="product-modal" role="dialog" aria-modal="true" aria-label={activeProduct.name} onMouseDown={(event) => event.stopPropagation()}><button className="close" onClick={() => setActiveProduct(null)} aria-label="Fermer">×</button><img src={activeProduct.image} alt={activeProduct.name}/><div><p className="eyebrow">{activeProduct.kind}</p><h2>{activeProduct.name}</h2><p>{activeProduct.description}</p><p className="modal-price">{euro.format(activeProduct.price)}</p><div className="variant"><span>Teinte</span><button>{activeProduct.shade}</button></div><button className="button button-dark wide" onClick={() => add(activeProduct)}>Ajouter au sac <span>→</span></button></div></section></div>}
-    {drawer && <aside className="cart-drawer" aria-label="Votre sac"><div className="cart-header"><h2>Votre sac <span>({cart.length})</span></h2><button className="close" onClick={() => setDrawer(false)} aria-label="Fermer le panier">×</button></div>{cart.length ? <><div className="cart-lines">{cart.map((product, index) => <div className="cart-line" key={`${product.id}-${index}`}><img src={product.image} alt=""/><div><h3>{product.name}</h3><p>{product.shade}</p><strong>{euro.format(product.price)}</strong></div><button onClick={() => remove(index)} aria-label={`Retirer ${product.name}`}>×</button></div>)}</div><div className="cart-total"><p><span>Sous-total</span><strong>{euro.format(subtotal)}</strong></p><small>Livraison et taxes calculées à l'étape suivante.</small><button className="button button-dark wide">Passer la commande <span>→</span></button></div></> : <div className="cart-empty"><p>Votre sac est encore vide.</p><button className="text-link" onClick={() => setDrawer(false)}>Découvrir la collection <span>→</span></button></div>}</aside>}
+    {drawer && <aside className="cart-drawer" aria-label="Votre sac"><div className="cart-header"><h2>Votre sac <span>({cart.length})</span></h2><button className="close" onClick={() => setDrawer(false)} aria-label="Fermer le panier">×</button></div>{cart.length ? <><div className="cart-lines">{cart.map((product, index) => <div className="cart-line" key={`${product.id}-${index}`}><img src={product.image} alt=""/><div><h3>{product.name}</h3><p>{product.shade}</p><strong>{euro.format(product.price)}</strong></div><button onClick={() => remove(index)} aria-label={`Retirer ${product.name}`}>×</button></div>)}</div><div className="cart-total"><p><span>Sous-total</span><strong>{euro.format(subtotal)}</strong></p><small>Livraison et taxes calculées à l'étape suivante.</small><button className="button button-dark wide" onClick={completeOrder}>Passer la commande <span>→</span></button></div></> : <div className="cart-empty"><p>Votre sac est encore vide.</p><button className="text-link" onClick={() => setDrawer(false)}>Découvrir la collection <span>→</span></button></div>}</aside>}
     {drawer && <button className="drawer-backdrop" onClick={() => setDrawer(false)} aria-label="Fermer le panier"></button>}
   </main>;
 }
