@@ -1,7 +1,7 @@
 export type ProductCategory = string;
 
 export type Product = {
-  id: number;
+  id: string;
   name: string;
   kind: string;
   category: ProductCategory;

@@ -11,7 +11,7 @@ export function ShopPage() {
   const [catalogue, setCatalogue] = useState(products);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("featured");
-  const [liked, setLiked] = useState<number[]>([]);
+  const [liked, setLiked] = useState<string[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
   useEffect(() => { fetch("/api/products").then((response) => response.ok ? response.json() : null).then((data) => { if (Array.isArray(data) && data.length) setCatalogue(data); }).catch(() => undefined); }, []);
   const visible = useMemo(() => catalogue
