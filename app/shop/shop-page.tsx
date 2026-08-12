@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { products, type ProductCategory } from "../../lib/catalog";
 
 const categories: Array<"Tout" | ProductCategory> = ["Tout", "Teint", "Joues", "Soin"];
@@ -8,13 +8,15 @@ const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR"
 
 export function ShopPage() {
   const [category, setCategory] = useState<(typeof categories)[number]>("Tout");
+  const [catalogue, setCatalogue] = useState(products);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("featured");
   const [liked, setLiked] = useState<number[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
-  const visible = useMemo(() => products
+  useEffect(() => { fetch("/api/products").then((response) => response.ok ? response.json() : null).then((data) => { if (Array.isArray(data) && data.length) setCatalogue(data); }).catch(() => undefined); }, []);
+  const visible = useMemo(() => catalogue
     .filter((product) => (category === "Tout" || product.category === category) && `${product.name} ${product.kind}`.toLowerCase().includes(query.toLowerCase()))
-    .sort((a, b) => sort === "low" ? a.price - b.price : sort === "high" ? b.price - a.price : a.id - b.id), [category, query, sort]);
+    .sort((a, b) => sort === "low" ? a.price - b.price : sort === "high" ? b.price - a.price : a.name.localeCompare(b.name)), [catalogue, category, query, sort]);
 
   return <main className="shop-all">
     <div className="shop-promo">Livraison offerte dès 50 € <span>·</span> Retours simples sous 30 jours</div>
