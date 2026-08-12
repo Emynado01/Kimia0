@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ÉCLAT — La beauté, en mouvement",
-  description: "Une maison de beauté contemporaine aux gestes essentiels.",
+  title: "KiMiA — Le maquillage qui vous ressemble",
+  description: "Couleur, soin et confiance — les essentiels beauté signés KiMiA.",
   openGraph: {
-    title: "ÉCLAT — La beauté, en mouvement",
-    description: "La lumière vous va si bien.",
-    images: ["/og.png"],
+    title: "KiMiA — Le maquillage qui vous ressemble",
+    description: "Couleur, soin et confiance au quotidien.",
   },
   twitter: { card: "summary_large_image" },
   icons: {
