@@ -5,5 +5,5 @@ export const dynamic = "force-dynamic";
 
 export default async function NewProductPage() {
   await requireAdmin();
-  return <main className="product-admin-page"><header><a href="/admin" className="back-home">← Tableau de bord</a><a href="/" className="wordmark">KiMiA<span>·</span></a></header><NewProductForm /></main>;
+  return <main className="product-admin-page"><header><a href="/admin" className="back-home">← Tableau de bord</a><a href="/" className="wordmark">Simire<span>·</span></a></header><NewProductForm /></main>;
 }

@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "KiMiA — Le maquillage qui vous ressemble",
-  description: "Couleur, soin et confiance — les essentiels beauté signés KiMiA.",
+  title: "Simire — Le maquillage qui vous ressemble",
+  description: "Couleur, soin et confiance — les essentiels beauté signés Simire.",
   openGraph: {
-    title: "KiMiA — Le maquillage qui vous ressemble",
+    title: "Simire — Le maquillage qui vous ressemble",
     description: "Couleur, soin et confiance au quotidien.",
   },
   twitter: { card: "summary_large_image" },
