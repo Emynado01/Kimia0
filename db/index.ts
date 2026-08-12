@@ -1,18 +1,7 @@
-import { env } from "cloudflare:workers";
-import { drizzle } from "drizzle-orm/d1";
-import * as schema from "./schema";
+import { neon } from "@neondatabase/serverless";
 
-export function getDb() {
-  if (!env.DB) {
-    throw new Error(
-      "Cloudflare D1 binding `DB` is unavailable. Set the `d1` field in .openai/hosting.json to `DB` or let your control plane inject the real binding values before using the database."
-    );
-  }
-
-  return drizzle(env.DB, { schema });
-}
-
-export function getRawDb() {
-  if (!env.DB) throw new Error("Cloudflare D1 binding `DB` is unavailable.");
-  return env.DB;
+export function getNeonSql() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error("DATABASE_URL is required for the KiMiA database.");
+  return neon(connectionString);
 }
