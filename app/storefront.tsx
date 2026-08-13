@@ -41,7 +41,7 @@ export function Storefront() {
     <header className="site-header">
       <a className="wordmark" href="#top" aria-label="Kimea, accueil">Kimea<span>·</span></a>
       <nav aria-label="Navigation principale"><a href="/shop">Shop all</a><a href="#nouveautes">Nouveautés</a><a href="#rituels">Rituels</a><a href="#maison">La maison</a></nav>
-      <div className="header-actions"><label className="search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher" aria-label="Rechercher un produit" /></label><a href="/admin" className="admin-link">Espace pro</a><button className={`bag${justAdded ? " bag-added" : ""}`} onClick={() => setDrawer(true)} aria-label={`Ouvrir le panier, ${cart.length} article${cart.length > 1 ? "s" : ""}`}>Sac <b>{cart.length}</b></button></div>
+      <div className="header-actions"><label className="search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher" aria-label="Rechercher un produit" /></label><a href="/admin" className="admin-link">Espace pro</a><button className={`bag${justAdded ? " bag-added" : ""}`} onClick={() => setDrawer(true)} aria-label={`Ouvrir le panier, ${cart.length} article${cart.length > 1 ? "s" : ""}`}><img src="/iconepanier.png" alt=""/>Sac <b>{cart.length}</b></button></div>
     </header>
 
     <section id="top" className="hero">
