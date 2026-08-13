@@ -36,9 +36,16 @@ export function sites(): Plugin {
         await cp(hostingConfig, resolve(outputDirectory, "hosting.json"));
       }
       if (await exists(drizzleSource)) {
-        await cp(drizzleSource, resolve(outputDirectory, "drizzle"), {
-          recursive: true,
-        });
+        const drizzleDestination = resolve(outputDirectory, "drizzle");
+        // Vinext can finalize more than one environment at once. They package
+        // the same migration folder, so a competing copy is already complete.
+        if (!(await exists(drizzleDestination))) {
+          try {
+            await cp(drizzleSource, drizzleDestination, { recursive: true });
+          } catch (error) {
+            if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+          }
+        }
       }
     },
   };
