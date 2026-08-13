@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./checkout-flow.css";
+import "./admin-workspace.css";
 
 export const metadata: Metadata = {
   title: "Kimea — Le maquillage qui vous ressemble",
