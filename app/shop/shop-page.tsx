@@ -21,7 +21,7 @@ export function ShopPage() {
   const [cartReady, setCartReady] = useState(false);
   const [justAdded, setJustAdded] = useState<string | null>(null);
   const subtotal = cart.reduce((sum, product) => sum + product.price, 0);
-  const addToCart = (product: Product) => { setCart((items) => [...items, product]); setDrawer(true); setJustAdded(product.name); if (navigator.vibrate) navigator.vibrate([30, 35, 45]); window.setTimeout(() => setJustAdded(null), 1200); };
+  const addToCart = (product: Product) => { setCart((items) => [...items, product]); setJustAdded(product.name); if (navigator.vibrate) navigator.vibrate([30, 35, 45]); window.setTimeout(() => setJustAdded(null), 1200); };
   const remove = (index: number) => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index));
   const checkout = () => { window.sessionStorage.setItem(CHECKOUT_DRAFT_KEY, JSON.stringify(createCheckoutDraft(cart))); router.push("/checkout"); };
   useEffect(() => { fetch("/api/products").then((response) => response.ok ? response.json() : null).then((data) => { if (Array.isArray(data) && data.length) setCatalogue(data); }).catch(() => undefined); }, []);
@@ -43,6 +43,5 @@ export function ShopPage() {
     <section className="shop-newsletter"><p className="eyebrow">La liste Kimea</p><h2>Les bonnes nouvelles<br/>vous iront bien.</h2><form onSubmit={(event) => event.preventDefault()}><input type="email" placeholder="Votre e-mail" aria-label="Votre e-mail"/><button>S'inscrire →</button></form></section>
     {drawer && <aside className="cart-drawer" aria-label="Votre sac"><div className="cart-header"><h2>Votre sac <span>({cart.length})</span></h2><button className="close" onClick={() => setDrawer(false)} aria-label="Fermer le panier">×</button></div>{cart.length ? <><div className="cart-lines">{cart.map((product, index) => <div className="cart-line" key={`${product.id}-${index}`}><img src={product.image} alt=""/><div><h3>{product.name}</h3><p>{product.shade}</p><strong>{euro.format(product.price)}</strong></div><button onClick={() => remove(index)} aria-label={`Retirer ${product.name}`}>×</button></div>)}</div><div className="cart-total"><p><span>Sous-total</span><strong>{euro.format(subtotal)}</strong></p><small>Livraison et taxes calculées à l'étape suivante.</small><button className="button button-dark wide" onClick={checkout}>Passer la commande <span>→</span></button></div></> : <div className="cart-empty"><p>Votre sac est encore vide.</p><button className="text-link" onClick={() => setDrawer(false)}>Continuer mes achats <span>→</span></button></div>}</aside>}
     {drawer && <button className="drawer-backdrop" onClick={() => setDrawer(false)} aria-label="Fermer le panier"></button>}
-    {justAdded && <p className="cart-toast" role="status">{justAdded} ajouté au sac</p>}
   </main>;
 }
