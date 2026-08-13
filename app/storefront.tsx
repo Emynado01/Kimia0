@@ -1,12 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { products, type Product } from "../lib/catalog";
 import { CHECKOUT_DRAFT_KEY, createCheckoutDraft } from "../lib/checkout";
 
 
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
+const editorialSlides = [
+  { image: "/sec01.png", label: "01", eyebrow: "Teint", title: "La lumière,\nà votre mesure.", copy: "Une chaleur modulable, pensée pour chaque nuance de peau." },
+  { image: "/sec02.png", label: "02", eyebrow: "Couleur", title: "Osez le\npoint de lumière.", copy: "Des pigments vivants pour jouer avec les détails qui vous ressemblent." },
+  { image: "/sec03.jpg", label: "03", eyebrow: "Expression", title: "Votre beauté\nprend la parole.", copy: "Des essentiels qui accompagnent votre allure, jamais l’inverse." },
+];
 
 export function Storefront() {
   const router = useRouter();
@@ -15,11 +20,17 @@ export function Storefront() {
   const [query, setQuery] = useState("");
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [promoVisible, setPromoVisible] = useState(true);
+  const [editorialIndex, setEditorialIndex] = useState(0);
   const shownProducts = useMemo(() => products.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()) || p.kind.toLowerCase().includes(query.toLowerCase())), [query]);
   const subtotal = cart.reduce((sum, product) => sum + product.price, 0);
   const add = (product: Product) => { setCart((items) => [...items, product]); setDrawer(true); setActiveProduct(null); };
   const remove = (index: number) => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index));
   const completeOrder = () => { window.sessionStorage.setItem(CHECKOUT_DRAFT_KEY, JSON.stringify(createCheckoutDraft(cart))); setDrawer(false); router.push("/checkout"); };
+  useEffect(() => {
+    const timer = window.setInterval(() => setEditorialIndex((index) => (index + 1) % editorialSlides.length), 5500);
+    return () => window.clearInterval(timer);
+  }, []);
+  const editorial = editorialSlides[editorialIndex];
 
   return <main>
     <div className="announcement">Livraison offerte dès 75 € <span>—</span> Échantillon signature dans chaque commande</div>
@@ -38,7 +49,7 @@ export function Storefront() {
 
     <section id="rituels" className="ritual"><div className="ritual-image"></div><div className="ritual-copy"><p className="eyebrow">Notre approche</p><h2>La beauté n'est<br/>jamais un excès.</h2><p>Elle est une attention. Une matière choisie, un parfum qui reste, une formule qui fait de la place à votre peau.</p><a href="#maison" className="text-link">Notre manifeste <span>↗</span></a></div></section>
 
-    <section className="journal" id="maison"><p className="eyebrow">Le journal Kimea</p><div><h2>Des histoires<br/>à porter.</h2><a href="#newsletter" className="button button-light">Entrer dans le journal <span>↗</span></a></div></section>
+    <section className="journal-carousel" id="maison" aria-label="Le journal Kimea"><div className="journal-stage"><div className="journal-stage-image" aria-live="polite"><img key={editorial.image} src={editorial.image} alt=""/></div><button className="journal-stage-copy" onClick={() => setEditorialIndex((index) => (index + 1) % editorialSlides.length)} aria-label="Afficher l’image suivante"><p className="eyebrow">Le journal Kimea · {editorial.eyebrow}</p><span className="journal-number">{editorial.label} / 03</span><h2>{editorial.title.split("\n").map((line) => <span key={line}>{line}<br/></span>)}</h2><p>{editorial.copy}</p><span className="journal-next">Voir la suite <b>→</b></span></button></div><div className="journal-thumbnails" aria-label="Choisir une image">{editorialSlides.map((slide, index) => <button key={slide.image} className={index === editorialIndex ? "selected" : ""} onClick={() => setEditorialIndex(index)} aria-label={`Voir l’image ${index + 1}`} aria-current={index === editorialIndex ? "true" : undefined}><img src={slide.image} alt=""/><span>{slide.label}</span></button>)}</div></section>
     <footer id="newsletter"><div className="footer-top"><a className="wordmark" href="#top">Kimea<span>·</span></a><div><h3>Un peu de lumière<br/>dans votre boîte mail.</h3><form onSubmit={(event) => event.preventDefault()}><input type="email" required placeholder="Votre adresse e-mail" aria-label="Votre adresse e-mail"/><button aria-label="S'inscrire">→</button></form></div></div><div className="footer-bottom"><span>© 2026 Kimea Beauty</span><span>Livraison & retours · Conditions · Confidentialité</span><span>France / EUR</span></div></footer>
 
     {activeProduct && <div className="modal-backdrop" role="presentation" onMouseDown={() => setActiveProduct(null)}><section className="product-modal" role="dialog" aria-modal="true" aria-label={activeProduct.name} onMouseDown={(event) => event.stopPropagation()}><button className="close" onClick={() => setActiveProduct(null)} aria-label="Fermer">×</button><img src={activeProduct.image} alt={activeProduct.name}/><div><p className="eyebrow">{activeProduct.kind}</p><h2>{activeProduct.name}</h2><p>{activeProduct.description}</p><p className="modal-price">{euro.format(activeProduct.price)}</p><div className="variant"><span>Teinte</span><button>{activeProduct.shade}</button></div><button className="button button-dark wide" onClick={() => add(activeProduct)}>Ajouter au sac <span>→</span></button></div></section></div>}
