@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { products, type Product } from "../lib/catalog";
-import { CHECKOUT_DRAFT_KEY, createCheckoutDraft } from "../lib/checkout";
+import { CHECKOUT_DRAFT_KEY, createCheckoutDraft, readCart, saveCart } from "../lib/checkout";
 
 
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
@@ -21,15 +21,19 @@ export function Storefront() {
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [promoVisible, setPromoVisible] = useState(true);
   const [editorialIndex, setEditorialIndex] = useState(0);
+  const [cartReady, setCartReady] = useState(false);
+  const [justAdded, setJustAdded] = useState<string | null>(null);
   const shownProducts = useMemo(() => products.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()) || p.kind.toLowerCase().includes(query.toLowerCase())), [query]);
   const subtotal = cart.reduce((sum, product) => sum + product.price, 0);
-  const add = (product: Product) => { setCart((items) => [...items, product]); setDrawer(true); setActiveProduct(null); };
+  const add = (product: Product) => { setCart((items) => [...items, product]); setDrawer(true); setActiveProduct(null); setJustAdded(product.name); if (navigator.vibrate) navigator.vibrate([30, 35, 45]); window.setTimeout(() => setJustAdded(null), 1200); };
   const remove = (index: number) => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index));
   const completeOrder = () => { window.sessionStorage.setItem(CHECKOUT_DRAFT_KEY, JSON.stringify(createCheckoutDraft(cart))); setDrawer(false); router.push("/checkout"); };
   useEffect(() => {
     const timer = window.setInterval(() => setEditorialIndex((index) => (index + 1) % editorialSlides.length), 5500);
     return () => window.clearInterval(timer);
   }, []);
+  useEffect(() => { setCart(readCart()); setCartReady(true); }, []);
+  useEffect(() => { if (cartReady) saveCart(cart); }, [cart, cartReady]);
   const editorial = editorialSlides[editorialIndex];
 
   return <main>
@@ -37,7 +41,7 @@ export function Storefront() {
     <header className="site-header">
       <a className="wordmark" href="#top" aria-label="Kimea, accueil">Kimea<span>·</span></a>
       <nav aria-label="Navigation principale"><a href="/shop">Shop all</a><a href="#nouveautes">Nouveautés</a><a href="#rituels">Rituels</a><a href="#maison">La maison</a></nav>
-      <div className="header-actions"><label className="search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher" aria-label="Rechercher un produit" /></label><a href="/admin" className="admin-link">Espace pro</a><button className="bag" onClick={() => setDrawer(true)} aria-label="Ouvrir le panier">Sac <b>{cart.length}</b></button></div>
+      <div className="header-actions"><label className="search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher" aria-label="Rechercher un produit" /></label><a href="/admin" className="admin-link">Espace pro</a><button className={`bag${justAdded ? " bag-added" : ""}`} onClick={() => setDrawer(true)} aria-label={`Ouvrir le panier, ${cart.length} article${cart.length > 1 ? "s" : ""}`}>Sac <b>{cart.length}</b></button></div>
     </header>
 
     <section id="top" className="hero">
@@ -56,5 +60,6 @@ export function Storefront() {
     {promoVisible && <div className="promo-backdrop" role="presentation" onMouseDown={() => setPromoVisible(false)}><section className="promo-modal" role="dialog" aria-modal="true" aria-labelledby="promo-title" onMouseDown={(event) => event.stopPropagation()}><button className="close promo-close" onClick={() => setPromoVisible(false)} aria-label="Fermer l’offre">×</button><div className="promo-image"><img src={products[1].image} alt={products[1].name}/><span>Édition du moment</span></div><div className="promo-copy"><p className="eyebrow">Bienvenue chez Kimea</p><h2 id="promo-title">-15 % sur votre<br/><em>première lumière.</em></h2><p>Découvrez la Palette Cheeksy N°02 et profitez de votre première touche de couleur avec le code <strong>KIMEA15</strong>.</p><button className="button button-dark wide" onClick={() => { add(products[1]); setPromoVisible(false); }}>Ajouter l’offre <span>→</span></button><button className="promo-dismiss" onClick={() => setPromoVisible(false)}>Continuer sans l’offre</button></div></section></div>}
     {drawer && <aside className="cart-drawer" aria-label="Votre sac"><div className="cart-header"><h2>Votre sac <span>({cart.length})</span></h2><button className="close" onClick={() => setDrawer(false)} aria-label="Fermer le panier">×</button></div>{cart.length ? <><div className="cart-lines">{cart.map((product, index) => <div className="cart-line" key={`${product.id}-${index}`}><img src={product.image} alt=""/><div><h3>{product.name}</h3><p>{product.shade}</p><strong>{euro.format(product.price)}</strong></div><button onClick={() => remove(index)} aria-label={`Retirer ${product.name}`}>×</button></div>)}</div><div className="cart-total"><p><span>Sous-total</span><strong>{euro.format(subtotal)}</strong></p><small>Livraison et taxes calculées à l'étape suivante.</small><button className="button button-dark wide" onClick={completeOrder}>Passer la commande <span>→</span></button></div></> : <div className="cart-empty"><p>Votre sac est encore vide.</p><button className="text-link" onClick={() => setDrawer(false)}>Découvrir la collection <span>→</span></button></div>}</aside>}
     {drawer && <button className="drawer-backdrop" onClick={() => setDrawer(false)} aria-label="Fermer le panier"></button>}
+    {justAdded && <p className="cart-toast" role="status">{justAdded} ajouté au sac</p>}
   </main>;
 }
